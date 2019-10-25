@@ -1,6 +1,17 @@
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
+import os
 
+
+def read_all_jpegs(jpeg_folder_path):
+    filenames = os.listdir(jpeg_folder_path)
+    results = {}
+    for file in filenames:
+        if (file[len(file) - 4:] == '.jpg'):
+            results[file] = read_jpeg(jpeg_folder_path + "/" + file)
+
+    return results
+    
 
 def read_jpeg(jpeg_path):
     return mpimg.imread(jpeg_path)
