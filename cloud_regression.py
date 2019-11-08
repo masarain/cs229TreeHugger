@@ -52,7 +52,7 @@ def logistic_regression(X, Y, theta=None):
         theta = np.zeros(X.shape[1])
     learning_rate = 0.1
     # theta = np.array([-3000, 0,0])
-    max_iterations = 200000
+    max_iterations = 2000000
 
     i = 0
     while i < max_iterations:
@@ -109,11 +109,9 @@ def main(train_path, label_path):
 
     # plot_points(np.array(x), np.array(y))
 
-    # theta = np.array([-8.19750497e+05, -1.56189738e+07, -1.59023226e+07, -5.36430159e+08, -5.63876556e+08])
-    theta = np.array([-98.12421915, -92986.31389205, -84482.43533785, 5291.16535734, -2216.77670579, -75947.0722486])
-    theta = np.array([412.76862094, -94944.84688406, -80571.91005116, 5344.90854079, -2249.83723926, -78835.96236183])
-    theta = np.array([924.66597612, -96746.61570586, -76539.70693396, 5369.2771662, -2305.59160811, -81622.4210792])
-    # theta = logistic_regression(np.array(x), y, theta)
+    # theta = np.array([924.66597612, -96746.61570586, -76539.70693396, 5369.2771662, -2305.59160811, -81622.4210792])
+    theta = np.array([311.67324592, -37.51466762, 11.17806561, 111.50054584, -314.71077383, -14.23669017])
+    theta = logistic_regression(np.array(x), y, theta)
     predicted = -1 * np.matmul(theta, np.transpose(x))
     predicted = np.exp(predicted)
     predicted = 1 / (1 + predicted)

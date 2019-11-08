@@ -18,7 +18,7 @@ def getRGBRatio(img):
     B2 = np.power(B, 1 * np.ones(B.shape))
 
     luminance = 0.299 * R2 + 0.587 * G2 + 0.114 * B2
-    luminance = luminance / (3 * 255)
+    luminance = luminance / ((0.299 + 0.587 + 0.114) * 255)
 
     # R = np.power(R, 2.2 * np.ones(R.shape))
     # G = np.power(G, 2.2 * np.ones(G.shape))
@@ -29,5 +29,5 @@ def getRGBRatio(img):
     meanB = np.mean(B[:,:])
     meanLuminance = np.mean(luminance[:, :])
 
-    return meanLuminance, meanG/meanR, meanG/meanB, meanB, meanR, 1
+    return meanLuminance, meanG/meanR, meanG/meanB, meanB/255, meanR/255, 1
     # return meanLuminance, meanG
