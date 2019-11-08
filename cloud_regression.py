@@ -6,6 +6,10 @@ from mpl_toolkits.mplot3d import Axes3D
 import getRGBratios
 
 
+img_folder = "train_subset"
+csv_file = "train_v2.csv"
+
+
 def plot_points(x, y):
     """Plot some points where x are the coordinates and y is the label"""
     x_one = x[y == 0, :]
@@ -107,5 +111,5 @@ def main(train_path, label_path):
     # logistic_regression(np.array(x), y)
 
 
-main("train_subset", "train_v2.csv")
+main(img_folder, csv_file)
 
