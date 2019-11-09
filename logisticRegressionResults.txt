@@ -1,0 +1,73 @@
+'haze' / 'cloudy' / 'partly cloudy, ~90.8%
+'primary', 93.2% (but only got 15 out of 42 non-primary)
+'agriculture', 72.2%, 12 out of 141 true positives
+'clear', 67%, 215 out of 353 true positives
+'water',
+'habitation',
+'road',
+'cultivation',
+'slash_burn',
+'cloudy',
+'partly_cloudy',
+'conventional_mine',
+'bare_ground',
+'artisinal_mine',
+'blooming',
+'selective_logging',
+'blow_down'
+
+
+water
+Accuracy for water: 0.804
+General water count: 98
+Accurate water: 0
+
+habitation
+Accuracy for habitation: 0.48
+General habitation count: 43
+Accurate habitation: 38
+
+road
+Accuracy for road: 0.702
+General road count: 109
+Accurate road: 80
+
+cultivation
+Accuracy for cultivation: 0.924
+General cultivation count: 38
+Accurate cultivation: 0
+
+slash_burn
+Accuracy for slash_burn: 0.994
+General slash_burn count: 3
+Accurate slash_burn: 0
+
+conventional mine
+Accuracy for conventional_mine: 1.0
+General conventional_mine count: 1
+Accurate conventional_mine: 1
+
+bare_ground
+Accuracy for bare_ground: 0.936
+General bare_ground count: 19
+Accurate bare_ground: 8
+
+artisinal_mine
+Accuracy for artisinal_mine: 0.986
+General artisinal_mine count: 7
+Accurate artisinal_mine: 0
+
+blooming
+Accuracy for blooming: 0.99
+General blooming count: 6
+Accurate blooming: 1
+
+selective_logging
+Accuracy for selective_logging: 0.988
+General selective_logging count: 6
+Accurate selective_logging: 0
+
+blow_down
+Accuracy for blow_down: 0.998
+General blow_down count: 1
+Accurate blow_down: 0
