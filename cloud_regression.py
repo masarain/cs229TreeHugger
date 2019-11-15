@@ -4,6 +4,8 @@ import util
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import getRGBratios
+import os
+os.chdir("./svm/")
 
 
 img_folder = "train_subset"
