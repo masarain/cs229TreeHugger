@@ -3,7 +3,7 @@ import numpy
 import cv2 as cv
 import numpy as np
 
-def applyLaplace(image, debug = True):
+def applyLaplace(image, debug = False):
     ## image is the 2D array with 3/4 channels
 
     ddepth = cv.CV_16S
