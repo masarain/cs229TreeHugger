@@ -1,10 +1,7 @@
-import os
-import matplotlib.image as mpimg
 import numpy as np
-import util
 
 
-def getRGBRatio(img):
+def extract_features(img):
     # img = cv2.imread(filename) # BGR
     # img = util.read_jpeg(filename)
     # Assume img is RGB

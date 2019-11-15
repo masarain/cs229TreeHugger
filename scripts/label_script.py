@@ -15,6 +15,7 @@ def load_labels(csv_path):
 
     return result
 
+
 def find_unique_catgories(all_categories):
     categories = []
     for tag in all_categories:
@@ -23,6 +24,7 @@ def find_unique_catgories(all_categories):
             if not (category in categories):
                 categories += [category]
     return categories
+
 
 all_tags = load_labels("train_v2.csv")
 unique_categories = find_unique_catgories(all_tags)
