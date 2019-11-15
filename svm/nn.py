@@ -133,7 +133,6 @@ with torch.no_grad():
             print(i,outputs, torch.sum(label))
             print("\n\n")
         # _, predicted = torch.max(outputs.data, 1)
-
         # correct += (predicted == labels).sum().item()
 
     print('Accuracy of the network on the 50 test images: {} %'.format(100 * correct / len(test_images)))
