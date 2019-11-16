@@ -95,17 +95,17 @@ class Net(nn.Module):
 
 model = Net(input_size, hidden_size, num_classes) # no device configuration here
 criterion = nn.SoftMarginLoss()
-# optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)  
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)  
 # model = TheModelClass(*args, **kwargs)
-model.load_state_dict(torch.load("model.ckpt"))
-model.eval()
-optimizer = TheOptimizerClass(*args, **kwargs)
+# model.load_state_dict(torch.load("model.ckpt"))
+# model.eval()
+# optimizer = TheOptimizerClass(*args, **kwargs)
 
-checkpoint = torch.load('./model.ckpt')
-model.load_state_dict(checkpoint['model_state_dict'])
-optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-epoch = checkpoint['epoch']
-loss = checkpoint['loss']
+# checkpoint = torch.load('./model.ckpt')
+# model.load_state_dict(checkpoint['model_state_dict'])
+# optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+# epoch = checkpoint['epoch']
+# loss = checkpoint['loss']
 
 
 total_step = len(train_images)
