@@ -8,7 +8,13 @@ import pandas as pd
 import glob, os
 import numpy as np
 
-os.chdir("./train_subset")
+fileDir = os.getcwd()
+os.chdir("./train-jpg")
+
+# there are 40480 training examples
+# we will allocate 39000 for training
+# and the remaining 1480 will be for validation
+
 input_size = 65536 # 256^2
 hidden_size = 20
 hidden_size_1 = 15
@@ -16,10 +22,10 @@ hidden_size_2 = 10
 hidden_size_3 = 5
 num_classes = 1
 learning_rate = 0.001
-num_epochs = 10
+num_epochs = 50
 
-train_num = 450
-test_num = 50
+train_num = 39000
+test_num = 1480
 
 # %% Load data--for clouds and non-clouds
 images = []
@@ -39,12 +45,12 @@ for i in range(train_num + test_num):
     tags = labels.iloc[i]["tags"]
     if i < train_num:
         train_images.append(imageio.imread(images[i], as_gray=True).flatten())
-        # train_labels.append(int("cloudy" not in tags and "haze" not in tags))
-        train_labels.append(int("water" not in tags))
+        train_labels.append(int("cloudy" not in tags and "haze" not in tags))
+        # train_labels.append(int("water" not in tags))
     else:
         test_images.append(imageio.imread(images[i], as_gray=True).flatten())
-        # test_labels.append(int("cloudy" not in tags and "haze" not in tags))
-        test_labels.append(int("water" not in tags))
+        test_labels.append(int("cloudy" not in tags and "haze" not in tags))
+        # test_labels.append(int("water" not in tags))
         
 
 # %%
