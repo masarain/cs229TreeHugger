@@ -6,6 +6,9 @@ from mpl_toolkits.mplot3d import Axes3D
 import featureExtract
 import logReg
 
+import os
+os.chdir("./svm/")
+
 
 img_folder = "train_subset"
 csv_file = "train_v2.csv"
