@@ -17,57 +17,87 @@
 'blow_down'
 
 
-water
-Accuracy for water: 0.804
-General water count: 98
-Accurate water: 0
-
-habitation
-Accuracy for habitation: 0.48
-General habitation count: 43
-Accurate habitation: 38
-
-road
-Accuracy for road: 0.702
-General road count: 109
-Accurate road: 80
-
-cultivation
-Accuracy for cultivation: 0.924
-General cultivation count: 38
-Accurate cultivation: 0
-
-slash_burn
-Accuracy for slash_burn: 0.994
-General slash_burn count: 3
-Accurate slash_burn: 0
-
-conventional mine
-Accuracy for conventional_mine: 1.0
-General conventional_mine count: 1
-Accurate conventional_mine: 1
-
-bare_ground
-Accuracy for bare_ground: 0.936
-General bare_ground count: 19
-Accurate bare_ground: 8
-
-artisinal_mine
-Accuracy for artisinal_mine: 0.986
-General artisinal_mine count: 7
-Accurate artisinal_mine: 0
-
-blooming
-Accuracy for blooming: 0.99
-General blooming count: 6
-Accurate blooming: 1
-
-selective_logging
-Accuracy for selective_logging: 0.988
-General selective_logging count: 6
-Accurate selective_logging: 0
-
-blow_down
-Accuracy for blow_down: 0.998
-General blow_down count: 1
+Accuracy is: 1.0
+General blow_down count: 0
+Non blow_down count: 1000
 Accurate blow_down: 0
+Accurate non blow_down: 1000
+False negative for blow_down: 0
+False positive for blow_down: 0
+
+Accuracy for water: 0.756
+General water count: 172
+Accurate water: 50
+Accurate non water: 706
+False negative for water: 122
+False positive for water: 122
+
+Accuracy for habitation: 0.915
+General habitation count: 85
+Accurate habitation: 0
+Accurate non habitation: 915
+False negative for habitation: 85
+False positive for habitation: 0
+
+Accuracy for road: 0.569
+General road count: 202
+Accurate road: 174
+Accurate non road: 395
+False negative for road: 28
+False positive for road: 403
+
+Accuracy for cultivation: 0.893
+General cultivation count: 107
+Accurate cultivation: 0
+Accurate non cultivation: 893
+False negative for cultivation: 107
+False positive for cultivation: 0
+
+Accuracy for slash_burn: 0.992
+General slash_burn count: 8
+Accurate slash_burn: 0
+Accurate non slash_burn: 992
+False negative for slash_burn: 8
+False positive for slash_burn: 0
+
+Accuracy for conventional_mine: 0.999
+General conventional_mine count: 0
+Accurate conventional_mine: 0
+Accurate non conventional_mine: 999
+False negative for conventional_mine: 0
+False positive for conventional_mine: 1
+
+Accuracy for bare_ground: 0.984
+General bare_ground count: 16
+Accurate bare_ground: 0
+Accurate non bare_ground: 984
+False negative for bare_ground: 16
+False positive for bare_ground: 0
+
+Accuracy for artisinal_mine: 0.992
+General artisinal_mine count: 8
+Accurate artisinal_mine: 0
+Accurate non artisinal_mine: 992
+False negative for artisinal_mine: 8
+False positive for artisinal_mine: 0
+
+Accuracy for blooming: 0.991
+General blooming count: 9
+Accurate blooming: 0
+Accurate non blooming: 991
+False negative for blooming: 9
+False positive for blooming: 0
+
+Accuracy for selective_logging: 0.992
+General selective_logging count: 8
+Accurate selective_logging: 0
+Accurate non selective_logging: 992
+False negative for selective_logging: 8
+False positive for selective_logging: 0
+
+Accuracy for blow_down: 1.0
+General blow_down count: 0
+Accurate blow_down: 0
+Accurate non blow_down: 1000
+False negative for blow_down: 0
+False positive for blow_down: 0

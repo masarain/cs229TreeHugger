@@ -12,16 +12,12 @@ csv_file = "train_v2.csv"
 valid_path = "validation_subset"
 
 
-def extract_feature_and_label(imgs, labels):
+def extract_feature_and_label(imgs, labels, label_to_include):
     x = []
     y = []
     for img_name in imgs.keys():
         features = featureExtract.extract_features(imgs[img_name])
-        if 'hazy' in labels[img_name]:
-            continue
-        elif 'cloudy' in labels[img_name]:
-            y += [1]
-        elif 'haze' in labels[img_name]:
+        if label_to_include in labels[img_name]:
             y += [1]
         else:
             y += [0]
@@ -36,23 +32,20 @@ def main(train_path, label_path):
 
     labels = ['water', 'habitation', 'road', 'cultivation', 'slash_burn', 'conventional_mine', 'bare_ground',
               'artisinal_mine', 'blooming', 'selective_logging', 'blow_down']
-    labels = ['cloudy']
     accuracy = {}
     positive_count = {}
     true_positive_count = {}
+    true_negative_count = {}
+    false_negative_count = {}
+    false_positive_count = {}
 
     for label in labels:
-        x, y = extract_feature_and_label(images, label_dict)
+        x, y = extract_feature_and_label(images, label_dict, label)
 
-        # theta = np.array([924.66597612, -96746.61570586, -76539.70693396, 5369.2771662, -2305.59160811, -81622.4210792])
-        # theta = np.array([311.67324592, -37.51466762, 11.17806561, 111.50054584, -314.71077383, -14.23669017])
-        theta = np.array([829.93898882, -58.36516723, 165.86166034, 1851.25020857, -1401.28024088, 15.04154101, -536.67415106])
-        theta = np.array([851.33147301, -72.41160088, 152.9213526, 1825.67382211, -1439.08611494, 3.77706817, -549.94950838])
-        theta = np.array([849.57621794, -84.11246563, 136.41558837, 1818.49671105, -1445.57183804, -79.22664165, -564.70006635])
         theta = None
         theta = logReg.logistic_regression(np.array(x), y, theta)
 
-        valid_x, valid_y = extract_feature_and_label(valid_imgs, label_dict)
+        valid_x, valid_y = extract_feature_and_label(valid_imgs, label_dict, label)
         predicted = logReg.predict(valid_x, theta)
 
         correct = 0
@@ -77,6 +70,9 @@ def main(train_path, label_path):
         accuracy[label] = correct / len(predicted)
         positive_count[label] = general_cloud
         true_positive_count[label] = correct_cloud
+        true_negative_count[label] = correct_non_label
+        false_positive_count[label] = false_positive
+        false_negative_count[label] = false_negative
 
         print("Accuracy is: " + str(correct / len(predicted)))
         print("General " + label + " count: " + str(general_cloud))
@@ -92,6 +88,9 @@ def main(train_path, label_path):
         print("Accuracy for " + key + ": " + str(accuracy[key]))
         print("General " + key + " count: " + str(positive_count[key]))
         print("Accurate " + key + ": " + str(true_positive_count[key]))
+        print("Accurate non " + key + ": " + str(true_negative_count[key]))
+        print("False negative for " + key + ": " + str(false_negative_count[key]))
+        print("False positive for " + key + ": " + str(false_positive_count[key]))
 
 
 main(img_folder, csv_file)

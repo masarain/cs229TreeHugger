@@ -51,3 +51,28 @@ def get_all_jpeg_files(jpeg_folder_location):
 
 
 
+def plot_points(x, y):
+    """Plot some points where x are the coordinates and y is the label"""
+    x_one = x[y == 0, :]
+    x_two = x[y == 1, :]
+    x_three = x[y == -1, :]
+
+    plt.scatter(x_one[:,0], x_one[:,1], marker='x', color='red')
+    plt.scatter(x_two[:,0], x_two[:,1], marker='o', color='blue')
+    plt.scatter(x_three[:, 0], x_three[:, 1], marker='x', color='green')
+
+    plt.show()
+
+
+def plot_3d(x, y):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    x_one = x[y == 0, :]
+    x_two = x[y == 1, :]
+
+    ax.scatter(x_one[:, 0], x_one[:, 1], x_one[:, 2], c='red')
+    ax.scatter(x_two[:, 0], x_two[:, 1], x_two[:, 2], c='blue')
+
+    plt.show()
+
