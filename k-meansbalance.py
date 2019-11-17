@@ -40,9 +40,9 @@ labels = pd.read_csv("./train_v2.csv") # labels are whether or not image is any 
 for i in range(train_num + test_num):
     tags = labels.iloc[i]["tags"]
     if i < train_num:
-        train_labels.append(int("cloudy" not in tags and "haze" not in tags))
+        train_labels.append(int("water" not in tags))
     else:
-        test_labels.append(int("cloudy" not in tags and "haze" not in tags))
+        test_labels.append(int("water" not in tags))
 
 centroid1count = 0
 centroid2count = 0
