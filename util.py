@@ -3,17 +3,17 @@ import matplotlib.pyplot as plt
 import os
 
 
-def load_data_and_label(train_path, label_path):
+def load_data_and_label(train_path, label_path, count=40000):
     label_dict = load_labels(label_path)
-    images = read_all_jpegs(train_path)
+    images = read_all_jpegs(train_path, count)
 
     return images, label_dict
 
 
-def read_all_jpegs(jpeg_folder_path):
+def read_all_jpegs(jpeg_folder_path, count=40000):
     filenames = os.listdir(jpeg_folder_path)
     results = {}
-    for file in filenames:
+    for file in filenames[0:count]:
         if file[len(file) - 4:] == '.jpg':
             results[file[0:-4]] = read_jpeg(jpeg_folder_path + "/" + file)
 
