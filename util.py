@@ -1,6 +1,17 @@
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
+import numpy as np
 import os
+
+
+def softmax(x):
+    results = []
+    for i in range(x.shape[0]):
+        row = x[i]
+        row = row - np.max(row)
+        normalization = np.sum(np.exp(row))
+        results += [np.exp(row) / normalization]
+    return np.array(results)
 
 
 def load_data_and_label(train_path, label_path):
@@ -19,6 +30,20 @@ def read_all_jpegs(jpeg_folder_path):
 
     return results
 
+
+def extract_all_feature(jpeg_folder_path, extract_feature_func):
+    filenames = os.listdir(jpeg_folder_path)
+    results = {}
+    i = 0
+    for file in filenames:
+        if i % 1000 == 0:
+            print("Extracting feature on image number: " + str(i))
+        i += 1
+        if file[len(file) - 4:] == '.jpg':
+            img = read_jpeg(jpeg_folder_path + "/" + file)
+            results[file[0:-4]] = extract_feature_func(img)
+
+    return results
 
 def read_jpeg(jpeg_path):
     return mpimg.imread(jpeg_path)
