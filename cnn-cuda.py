@@ -5,6 +5,7 @@ import torchvision.transforms as transforms
 import util
 import time
 import argparse
+import matplotlib.pyplot as plt
 
 from kaggledataset import KaggleAmazonDataset
 
@@ -21,7 +22,7 @@ def createLossAndOptimizer(net, learning_rate=0.001):
 	loss = torch.nn.CrossEntropyLoss()
 
 	#Optimizer
-	optimizer = optim.Adam(net.parameters(), lr=learning_rate)
+	optimizer = optim.Adam(net.parameters(), lr=learning_rate, weight_decay=1e-5)
 
 	return(loss, optimizer)
 
@@ -33,34 +34,23 @@ def prune_dict(label_dict, images):
 	return new_dict
 
 
-def create_one_hot_label(labels, classes):
-	n_classes = len(classes)
-	n_labels = len(labels)
-
-	label_tensors = {}
-	transform = transforms.Compose([transforms.ToTensor()])
-	for key in labels.keys():
-		label = np.zeros(2, dtype = np.int64)
-		if labels[key] == 'cloudy':
-			label[0] = 1
-		elif labels[key] == 'not_cloudy':
-			label[1] = 1
-		label_tensors[key] = torch.from_numpy(label)
-
-	return label_tensors
-
-
 def preprocess(image_path, label_path, count = 40000):
-	#labels = prune_dict(label_dict, images)
-	#print("lenth of dataset", len(labels))
-	# classes = ('cloudy', 'not_cloudy')
-	#label_tensors = create_one_hot_label(labels, classes)
 
 	transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 	dset = KaggleAmazonDataset( image_path, label_path, transform)
 
 	return dset
 
+
+def accuracy(labels, outputs):
+    labels = labels.to('cpu')
+    outputs = outputs.to('cpu')
+    #print("labels", torch.max(labels, 1)[1])
+    #print("outputs", torch.max(outputs, 1)[1])
+    checks = (torch.max(outputs, 1)[1] == torch.max(labels, 1)[1]).type(torch.float)
+    #print("checks", checks)
+    correct = (torch.sum(checks))
+    return correct.data, len(checks)
 
 
 def trainNet(args, net, train_loader, val_loader, batch_size, n_epochs, learning_rate):
@@ -83,6 +73,12 @@ def trainNet(args, net, train_loader, val_loader, batch_size, n_epochs, learning
 
 	#Time for printing
 	training_start_time = time.time()
+	
+	#vars
+	cost_train = []
+	cost_dev = []
+	accuracy_train = []
+	accuracy_dev = []
 
 	#Loop for n_epochs
 	for epoch in range(n_epochs):
@@ -91,7 +87,9 @@ def trainNet(args, net, train_loader, val_loader, batch_size, n_epochs, learning
 		print_every = n_batches // 10
 		start_time = time.time()
 		total_train_loss = 0
-
+		acc = 0.0
+		total_acc = 0.0
+		total_count = 0
 		for i, data in enumerate(train_loader, 0):
 
 			#Get inputs
@@ -118,16 +116,28 @@ def trainNet(args, net, train_loader, val_loader, batch_size, n_epochs, learning
 			print("loss_size", loss_size)
 			running_loss += loss_size.data
 			total_train_loss += loss_size.data
-
+			#print("output", outputs, np.shape(outputs))
+			accu, count = accuracy(labels, outputs)
+			total_acc +=  accu
+			total_count += count
+			#exit(1)
 			#Print every 10th batch of an epoch
 			if (i + 1) % (print_every + 1) == 0:
 				print("Epoch {}, {:d}% \t train_loss: {:.2f} took: {:.2f}s".format(epoch+1, int(100 * (i+1) / n_batches), running_loss / print_every, time.time() - start_time))
 				#Reset running loss and time
 				running_loss = 0.0
+				acc = 0.0
 				start_time = time.time()
-
+			del inputs
+			del labels
+			torch.cuda.empty_cache()
+		print("Train acc = {:.2f}, ".format(total_acc / total_count))
+		cost_train.append(total_train_loss / len(train_loader))
+		accuracy_train.append(total_acc / total_count)
 		#At the end of the epoch, do a pass on the validation set
 		total_val_loss = 0
+		total_val_acc = 0.0
+		total_acc_count = 0
 		for inputs, labels in val_loader:
 			inputs = inputs.to(args.device)
 			labels = labels.to(args.device)
@@ -139,12 +149,36 @@ def trainNet(args, net, train_loader, val_loader, batch_size, n_epochs, learning
 			val_outputs = net(inputs)
 			val_loss_size = loss(val_outputs, torch.max(labels, 1)[1])
 			total_val_loss += val_loss_size.data
-
-		print("Validation loss = {:.2f}".format(total_val_loss / len(val_loader)))
-
+			acc, count = accuracy(labels, val_outputs)
+			total_val_acc += acc
+			total_acc_count += count
+			del inputs
+			del labels
+			torch.cuda.empty_cache()
+		print("Validation loss = {:.2f}, ".format(total_val_loss / len(val_loader)))
+		print("Validation acc = {:.2f}, ".format(total_val_acc / total_acc_count))
+		cost_dev.append(total_val_loss / len(val_loader))
+		accuracy_dev.append(total_val_acc / total_acc_count)
 	print("Training finished, took {:.2f}s".format(time.time() - training_start_time))
-
-
+	
+	## plotting the loss and accuracy:
+	fig, (ax1, ax2) = plt.subplots(2, 1)
+	t = np.arange(n_epochs)
+	ax1.plot(t, cost_train,'r', label='train')
+	ax1.plot(t, cost_dev, 'b', label='dev')
+	ax1.set_xlabel('epochs')
+	ax1.set_ylabel('loss')
+	ax1.set_title('CNN')
+	ax1.legend()
+	
+	ax2.plot(t, accuracy_train,'r', label='train')
+	ax2.plot(t, accuracy_dev, 'b', label='dev')
+	ax2.set_xlabel('epochs')
+	ax2.set_ylabel('accuracy')
+	ax2.legend()
+	
+	fig.savefig('./' + 'cnn-cuda-seed12' + '.pdf')
+	
 def main():
 	print("hello world")
 
@@ -156,15 +190,15 @@ def main():
 		args.device = torch.device('cuda')
 	else:
 		args.device = torch.device('cpu')
-
+	torch.cuda.empty_cache()
 	seed = 42
 	np.random.seed(seed)
 	torch.manual_seed(seed)
 
 	## 1. preprocess
-	image_path = r'D:\Projects\cs229\cs229TreeHugger\train-jpg'
-	label_path = r'D:\Projects\cs229\cs229TreeHugger\planet\train_v2_cloudy_not_cloudy.csv'
-	n_exp = int(12800/2.0)
+	image_path = r'/home/anishag/tree/cs229/train-jpg'
+	label_path = r'/home/anishag/tree/cs229/cs229TreeHugger/train_v2.csv'
+	n_exp = int(40320)
 
 	train_set = preprocess(image_path, label_path)
 
@@ -190,9 +224,9 @@ def main():
 
 
 	CNN = SimpleCNN()
-	trainNet(args, CNN, train_loader, val_loader, batch_size=batch_size, n_epochs=5, learning_rate=0.001)
-
-
+	trainNet(args, CNN, train_loader, val_loader, batch_size=batch_size, n_epochs=10, learning_rate=0.001)
+	del CNN
+	torch.cuda.empty_cache()
 	return
 
 if __name__ == '__main__':
