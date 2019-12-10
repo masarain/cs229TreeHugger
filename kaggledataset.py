@@ -48,7 +48,7 @@ class KaggleAmazonDataset(data.Dataset):
 
 		new_label = np.zeros(3, dtype = np.int64)
 		label = self.labels[filename[0:-4]] 
-		if 'cloudy' in label or 'haze' in label:
+		if ('cloudy' in label and 'partly' not in label) or 'haze' in label:
 			new_label = np.array([1, 0, 0])
 		elif 'habitation' in label or 'agriculture' in label or 'cultivation' in label or 'conventional_mine' in label or 'selective_logging' in label or 'artisinal_mine' in label or 'slash_burn' in label:
 			new_label = np.array([0, 1, 0])
