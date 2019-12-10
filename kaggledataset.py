@@ -42,17 +42,20 @@ class KaggleAmazonDataset(data.Dataset):
 
 	def __getitem__(self, index):
 		filename = self.filenames[index]
-		img = self.read_jpeg( self.image_path + r'\\' + filename)[:,:,0:3]
+		img = self.read_jpeg( self.image_path + '/' + filename)[:,:,0:3]
 		if self.transform is not None:
 			img = self.transform(img)
 
-		label = np.zeros(2, dtype = np.int64)
-		if self.labels[filename[0:-4]] == 'cloudy':
-			label = np.array([1, 0])
-		elif self.labels[filename[0:-4]] == 'not_cloudy':
-			label = np.array([0, 1])
+		new_label = np.zeros(3, dtype = np.int64)
+		label = self.labels[filename[0:-4]] 
+		if 'cloudy' in label or 'haze' in label:
+			new_label = np.array([1, 0, 0])
+		elif 'habitation' in label or 'agriculture' in label or 'cultivation' in label or 'conventional_mine' in label or 'selective_logging' in label or 'artisinal_mine' in label or 'slash_burn' in label:
+			new_label = np.array([0, 1, 0])
+		else:
+		    new_label = np.array([0, 0, 1])
 
-		return img, torch.from_numpy(label)
+		return img, torch.from_numpy(new_label)
 
 	def __len__(self):
 		return len(self.filenames)
