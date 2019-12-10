@@ -55,17 +55,6 @@ for i in range(train_num + test_num):
         test_labels.append(int("cloudy" not in tags and "haze" not in tags))
         # test_labels.append(int("water" not in tags))
         
-
-# %%
-
-
-
-
-
-# exit()
-
-
-# %%
 class Net(nn.Module):
     def __init__(self, input_size, hidden_size, num_classes):
         super(Net, self).__init__()
