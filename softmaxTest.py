@@ -29,9 +29,9 @@ def extract_feature_and_label(imgs, labels):
     y = []
     for img_name in imgs.keys():
         features = featureExtract.extract_features(imgs[img_name])
-        if 'hazy' in labels[img_name]:
-            continue
-        elif 'cloudy' in labels[img_name] or 'haze' in labels[img_name]:
+        # if 'hazy' in labels[img_name]:
+        #     continue
+        if 'cloudy' in labels[img_name] or 'haze' in labels[img_name]:
             y += [[1, 0, 0]]
         elif is_human_intervention(labels[img_name]):
             y += [[0, 1, 0]]
