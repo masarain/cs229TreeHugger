@@ -22,7 +22,7 @@ def createLossAndOptimizer(net, learning_rate=0.001):
 	loss = torch.nn.CrossEntropyLoss()
 
 	#Optimizer
-	optimizer = optim.Adam(net.parameters(), lr=learning_rate, weight_decay=1e-5)
+	optimizer = optim.Adam(net.parameters(), lr=learning_rate, weight_decay=1e-3)
 
 	return(loss, optimizer)
 
@@ -38,7 +38,7 @@ def preprocess(image_path, label_path, count = 40000):
 
 	transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 	dset = KaggleAmazonDataset( image_path, label_path, transform)
-
+	#print("labels len", util.load_labels(label_path))
 	return dset
 
 
@@ -53,7 +53,26 @@ def accuracy(labels, outputs):
     return correct.data, len(checks)
 
 
-def trainNet(args, net, train_loader, val_loader, batch_size, n_epochs, learning_rate):
+def accuracyByClass(labels, outputs, label):
+    labels = labels.to('cpu')
+    outputs = outputs.to('cpu')
+    checks = ((torch.max(outputs, 1)[1] == label)).type(torch.int)
+    count = (torch.max(labels, 1)[1] == label).type(torch.int)
+    checks = ((checks & count)).type(torch.float)
+    
+    return (torch.sum(checks).data), torch.sum(count).data
+
+
+def specificityByClass(labels, outputs, label):
+    labels = labels.to('cpu')
+    outputs = outputs.to('cpu')
+    checks = ((torch.max(outputs, 1)[1] == label)).type(torch.int)
+    count = (torch.max(labels, 1)[1] != label).type(torch.int)
+    checks = ((checks & count)).type(torch.float)
+    
+    return (torch.sum(checks).data), torch.sum(count).data
+
+def trainNet(args, net, train_loader, val_loader, test_loader, stitched_loader, batch_size, n_epochs, learning_rate):
 
 	#Print all of the hyperparameters of the training iteration:
 	print("===== HYPERPARAMETERS ========")
@@ -160,7 +179,94 @@ def trainNet(args, net, train_loader, val_loader, batch_size, n_epochs, learning
 		cost_dev.append(total_val_loss / len(val_loader))
 		accuracy_dev.append(total_val_acc / total_acc_count)
 	print("Training finished, took {:.2f}s".format(time.time() - training_start_time))
-	
+
+	#At the end, do a pass on the test set
+	total_test_loss = 0
+	total_test_acc = 0.0
+	total_test_count = 0
+	total_cloud_accuracy = 0.0
+	total_cloud_count = 0.0
+	total_human_accuracy = 0.0
+	total_human_count = 0.0
+	total_non_accuracy = 0.0
+	total_non_count = 0.0
+	for inputs, labels in test_loader:
+		inputs = inputs.to(args.device)
+		labels = labels.to(args.device)
+
+		#Wrap tensors in Variables
+		inputs, labels = Variable(inputs), Variable(labels)
+
+		#Forward pass
+		test_outputs = net(inputs)
+		test_loss_size = loss(test_outputs, torch.max(labels, 1)[1])
+		total_test_loss += test_loss_size.data
+		acc, count = accuracy(labels, test_outputs)
+		total_test_acc += acc
+		total_test_count += count
+		acc, count = accuracyByClass(labels, test_outputs, 0)
+		total_cloud_accuracy += acc
+		total_cloud_count += count
+		acc, count = accuracyByClass(labels, test_outputs, 1)
+		total_human_accuracy += acc
+		total_human_count += count
+		acc, count = accuracyByClass(labels, test_outputs, 2)
+		total_non_accuracy += acc
+		total_non_count += count
+		
+		del inputs
+		del labels
+		torch.cuda.empty_cache()
+	print("Test loss = {:.2f}, ".format(total_test_loss / len(test_loader)))
+	print("Test acc = {:.2f}, ".format(total_test_acc / total_test_count))
+	print("Test Cloud acc = {:.2f}, ".format(total_cloud_accuracy / total_cloud_count))
+	print("Test Human acc = {:.2f}, ".format(total_human_accuracy / total_human_count))
+	print("Test Non-Human acc = {:.2f}, ".format(total_non_accuracy / total_non_count))
+
+
+	#At the end, do a pass on the stitched set
+	total_test_loss = 0
+	total_test_acc = 0.0
+	total_test_count = 0
+	total_cloud_accuracy = 0.0
+	total_cloud_count = 0.0
+	total_human_accuracy = 0.0
+	total_human_count = 0.0
+	total_non_accuracy = 0.0
+	total_non_count = 0.0
+	for inputs, labels in stitched_loader:
+		inputs = inputs.to(args.device)
+		labels = labels.to(args.device)
+
+		#Wrap tensors in Variables
+		inputs, labels = Variable(inputs), Variable(labels)
+
+		#Forward pass
+		test_outputs = net(inputs)
+		test_loss_size = loss(test_outputs, torch.max(labels, 1)[1])
+		total_test_loss += test_loss_size.data
+		acc, count = accuracy(labels, test_outputs)
+		total_test_acc += acc
+		total_test_count += count
+		acc, count = accuracyByClass(labels, test_outputs, 0)
+		total_cloud_accuracy += acc
+		total_cloud_count += count
+		acc, count = accuracyByClass(labels, test_outputs, 1)
+		total_human_accuracy += acc
+		total_human_count += count
+		acc, count = accuracyByClass(labels, test_outputs, 2)
+		total_non_accuracy += acc
+		total_non_count += count
+		
+		del inputs
+		del labels
+		torch.cuda.empty_cache()
+	print("Stitched loss = {:.2f}, ".format(total_test_loss / len(stitched_loader)))
+	print("Stitched acc = {:.2f}, ".format(total_test_acc / total_test_count))
+	print("Stitched Cloud acc = {:.2f}, ".format(total_cloud_accuracy / total_cloud_count))
+	print("Stitched Human acc = {:.2f}, ".format(total_human_accuracy / total_human_count))
+	print("Stitched Non-Human acc = {:.2f}, ".format(total_non_accuracy / total_non_count))
+
 	## plotting the loss and accuracy:
 	fig, (ax1, ax2) = plt.subplots(2, 1)
 	t = np.arange(n_epochs)
@@ -177,7 +283,7 @@ def trainNet(args, net, train_loader, val_loader, batch_size, n_epochs, learning
 	ax2.set_ylabel('accuracy')
 	ax2.legend()
 	
-	fig.savefig('./' + 'cnn-cuda-seed12' + '.pdf')
+	fig.savefig('./' + 'cnn-cuda_reduced_neurons' + '.pdf')
 	
 def main():
 	print("hello world")
@@ -198,33 +304,41 @@ def main():
 	## 1. preprocess
 	image_path = r'/home/anishag/tree/cs229/train-jpg'
 	label_path = r'/home/anishag/tree/cs229/cs229TreeHugger/train_v2.csv'
-	n_exp = int(40320)
+	n_exp = int(40000)
 
 	train_set = preprocess(image_path, label_path)
 
-	# Training
-	n_training_samples = int(.80 * n_exp)
-	train_sampler = SubsetRandomSampler(np.arange(n_training_samples, dtype=np.int64))
-
 	#Validation
-	n_val_samples = n_exp - n_training_samples#int(.20 * n_exp)
-	val_sampler = SubsetRandomSampler(np.arange(n_training_samples, n_training_samples + n_val_samples, dtype=np.int64))
+	n_val_samples = 2000
+	val_sampler = SubsetRandomSampler(np.arange(0, n_val_samples, dtype=np.int64))
+
+    # Training
+	n_training_samples = 36000
+	train_sampler = SubsetRandomSampler(np.arange(n_val_samples, n_training_samples + n_val_samples, dtype=np.int64))
 
 	#Test
-	#n_test_samples = 5000
-	#test_sampler = SubsetRandomSampler(np.arange(n_test_samples, dtype=np.int64))
+	n_test_samples = 2000
+	test_sampler = SubsetRandomSampler(np.arange(n_training_samples + n_val_samples, n_training_samples + n_val_samples + n_test_samples, dtype=np.int64))
+	
+	#Test_stitched
+	stitched_im_path = r'/home/anishag/tree/cs229/cs229TreeHugger/stitched'
+	stitched_csv_path = r'/home/anishag/tree/cs229/cs229TreeHugger/stitched/stitched_labels.csv'
+	stitched_set = preprocess(stitched_im_path, stitched_csv_path)
+	n_stitched_samples = 2000
+	stitched_sampler = SubsetRandomSampler(np.arange(0, n_stitched_samples, dtype=np.int64))
 
 
 	batch_size = 128
 	train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size,
 						sampler=train_sampler, num_workers=2)
 
-	#test_loader = torch.utils.data.DataLoader(test_set, batch_size=4, sampler=test_sampler, num_workers=2)
+	test_loader = torch.utils.data.DataLoader(train_set, batch_size=16, sampler=test_sampler, num_workers=2)
 	val_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, sampler=val_sampler, num_workers=2)
-
-
+	
+	stitched_loader = torch.utils.data.DataLoader(stitched_set, batch_size=16, sampler=stitched_sampler, num_workers=2)
+	#print("stitched_loader", stitched_loader)
 	CNN = SimpleCNN()
-	trainNet(args, CNN, train_loader, val_loader, batch_size=batch_size, n_epochs=10, learning_rate=0.001)
+	trainNet(args, CNN, train_loader, val_loader, test_loader, stitched_loader, batch_size=batch_size, n_epochs=15, learning_rate=0.001)
 	del CNN
 	torch.cuda.empty_cache()
 	return
