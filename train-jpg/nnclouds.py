@@ -33,7 +33,7 @@ test_num = 2000
 valid_num = 2000
 
 
-torch.set_default_tensor_type('torch.cuda.FloatTensor')
+# torch.set_default_tensor_type('torch.cuda.FloatTensor')
 # %% Load data--for clouds and non-clouds
 images = []
 
@@ -105,8 +105,8 @@ class Net(nn.Module):
 
 model = Net(input_size, hidden_size, num_classes) # no device configuration here
 comp_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(comp_device)
-# model = model.to(device=comp_device)
+# print(comp_device)
+model = model.to(device=comp_device)
 
 criterion = nn.CrossEntropyLoss() #need to change to CrossEntropyLoss
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)  
@@ -126,8 +126,11 @@ for epoch in range(num_epochs):
 
         # print([list(train_labels[i]).index(1)])
         image = torch.Tensor(train_images[i]).reshape(1, input_size * not_gray)
+        image = image.to(comp_device)
         label = torch.Tensor([list(train_labels[i]).index(1)])
+        label = label.to(comp_device)
         label = label.long()
+
         # print(label)
         
         # label = label.long()
@@ -148,11 +151,17 @@ for epoch in range(num_epochs):
         epoch_loss += loss.data
         curr_accuracy = (torch.argmax(outputs) == torch.argmax(label)).type(torch.float)
         epoch_accuracy += curr_accuracy
+
+        del image
+        del label
+        torch.cuda.empty_cache()
         
 
     for i, image in enumerate(test_images):
         image = torch.Tensor(test_images[i]).reshape(1, input_size* not_gray)
+        image = image.to(comp_device)
         label = torch.Tensor([list(test_labels[i]).index(1)])
+        label = label.to(comp_device)
         label = label.long()
         outputs = model(image)
         loss = criterion(outputs, label)
@@ -164,6 +173,7 @@ for epoch in range(num_epochs):
         curr_accuracy = (torch.argmax(outputs) == torch.argmax(label)).type(torch.float)
         epoch_accuracy_valid += curr_accuracy
 
+    
     print ("Epoch [{}/{}], AverageLoss {}, Average Accuracy {}"
                    .format(epoch+1, num_epochs, epoch_loss/len(train_images),epoch_accuracy/len(train_images)))
     cost_train.append(epoch_loss/len(train_images))
