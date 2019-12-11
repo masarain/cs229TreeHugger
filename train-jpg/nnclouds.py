@@ -20,10 +20,10 @@ fileDir = os.getcwd()
 
 input_size = 65536 # 256^2
 not_gray = 3*1
-hidden_size = 2000
-hidden_size_1 = 1500
-hidden_size_2 = 1000
-hidden_size_3 = 500
+hidden_size = 200
+hidden_size_1 = 150
+hidden_size_2 = 10
+hidden_size_3 = 5
 num_classes = 3
 learning_rate = 0.001
 num_epochs = 50
@@ -105,7 +105,7 @@ class Net(nn.Module):
 
 model = Net(input_size, hidden_size, num_classes) # no device configuration here
 comp_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-# print(comp_device)
+print("Device Type: {}".format(comp_device))
 model = model.to(device=comp_device)
 
 criterion = nn.CrossEntropyLoss() #need to change to CrossEntropyLoss
@@ -173,6 +173,9 @@ for epoch in range(num_epochs):
         curr_accuracy = (torch.argmax(outputs) == torch.argmax(label)).type(torch.float)
         epoch_accuracy_valid += curr_accuracy
 
+        del image
+        del label
+        torch.cuda.empty_cache()
     
     print ("Epoch [{}/{}], AverageLoss {}, Average Accuracy {}"
                    .format(epoch+1, num_epochs, epoch_loss/len(train_images),epoch_accuracy/len(train_images)))
