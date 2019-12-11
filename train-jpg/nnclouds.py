@@ -33,7 +33,7 @@ test_num = 2000
 valid_num = 2000
 
 
-torch.set_default_tensor_type('torch.cuda.LongTensor')
+torch.set_default_tensor_type('torch.cuda.FloatTensor')
 # %% Load data--for clouds and non-clouds
 images = []
 
