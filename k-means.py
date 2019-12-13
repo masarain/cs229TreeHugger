@@ -3,13 +3,14 @@ import numpy as np
 from scipy.cluster.vq import vq, kmeans, whiten
 import matplotlib.pyplot as plt
 import pandas as pd
+from sklearn.decomposition import PCA
 
 df = pd.read_csv("features.csv", header=None)
 train_features = []
 test_features = []
 
-train_num = 35000
-test_num = 5000
+train_num = 38000
+test_num = 2000
 
     
 for row in df.iterrows():
@@ -75,18 +76,29 @@ def main():
     # cetnroid2 = np.array( [ 3.46567439, 6.24308837, 6.04587955, 3.36558527, 3.13408703, 2.01998688, 1.])
 
     num_correct = 0
+    norm_1_correct, norm_1_incorrect, norm_2_correct, norm_2_incorrect = 0,0,0,0
     for i, features in enumerate(test_features):
         norm1 = np.linalg.norm(centroid1.reshape(7,1) - np.array(features).reshape(7,1))
         norm2 = np.linalg.norm(centroid2.reshape(7,1) - np.array(features).reshape(7,1))
         if norm1 > norm2:
-            if test_labels[i] == centroid_2_label: num_correct += 1
+            if test_labels[i] == centroid_2_label: 
+                num_correct += 1
+                norm_1_correct +=1 
+            else: norm_1_incorrect +=1
+
             # else: print("wrong in norm1!: predicted: {}. actual: {}".format(1, test_labels[i]))
         else: 
-            if test_labels[i] == centroid_1_label: num_correct += 1
+            if test_labels[i] == centroid_1_label: 
+                num_correct += 1
+                norm_2_correct += 1
+            else:
+                norm_2_incorrect += 1
             # else: print("wrong in norm2!: predicted: {}. actual: {}".format(0, test_labels[i]))
         
     print("Number correct {} out of {}".format(num_correct, test_num))
     print("Number actually not cloudy or hazy {}".format(sum(test_labels)))
+    print("Norm1: {}. Correct: {}. Inncorect: {}".format(centroid_1_label, norm_1_correct, norm_1_incorrect))
+    print("Norm2: {}. Correct: {}. Inncorect: {}".format(centroid_2_label, norm_2_correct, norm_2_incorrect))
 
 if __name__ == "__main__":
      for _ in range(10):
