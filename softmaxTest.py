@@ -68,19 +68,50 @@ def main(train_path, label_path):
         [-0.02840839, 0.10883493,-0.08042655],
         [-0.27839323, 0.42168854,-0.14329531]]
 
+        valid_x, valid_y = extract_feature_and_label(valid_imgs, label_dict)
 
-        w = regression.softmaxReg.train(np.array(x), y, w)
+
+        w, all_loss, all_train_accuracy, all_valid_accuracy = regression.softmaxReg.train(np.array(x), y, w, valid_x, valid_y)
 
         print("w is:")
         print(w)
 
-        valid_x, valid_y = extract_feature_and_label(valid_imgs, label_dict)
+        
         print(valid_y.shape)
         valid_y = np.argmax(valid_y, axis=1)
+
+        predicted_training = regression.softmaxReg.predict(x, w)
+        train_y = np.argmax(y, axis=1)
+        train_correct = 0
+        for i in range(len(predicted_training)):
+            if predicted_training[i] == train_y[i]:
+                train_correct += 1
+
+        print("Training accuracy is: " + str(train_correct / len(predicted_training)))
+
         predicted = regression.softmaxReg.predict(valid_x, w)
 
         # print("Predicted:")
         # print(predicted)
+
+        t = np.linspace(0, 200 * len(all_loss), len(all_loss))
+
+        # fig, (ax1, ax2) = plt.subplots(2, 1)
+
+        # ax1.plot(t, all_loss,'r', label='train')
+        # ax1.set_xlabel('epochs')
+        # ax1.set_ylabel('loss')
+        # ax1.legend()
+
+        # ax2.plot(t, all_train_accuracy,'r', label='train')
+        # ax2.plot(t, all_valid_accuracy, 'b', label='dev')
+        # ax2.set_xlabel('epochs')
+        # ax2.set_ylabel('accuracy')
+        # ax2.legend()
+
+        # fig.savefig('./' + "softmaxReg" + '.png')
+
+        results = np.zeros([3,3])
 
         correct = 0
         correct_non_label = 0
@@ -88,6 +119,7 @@ def main(train_path, label_path):
         false_positive = 0
         false_negative = 0
         for i in range(len(predicted)):
+            results[int(predicted[i]), int(valid_y[i])] += 1
             if predicted[i] == valid_y[i]:
                 correct += 1
                 if predicted[i] == 0:
@@ -98,6 +130,9 @@ def main(train_path, label_path):
                 false_negative += 1
             else:
                 false_positive += 1
+
+        print("Results matrix:")
+        print(results)
 
         general_cloud = np.sum(valid_y)
 

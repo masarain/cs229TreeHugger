@@ -20,17 +20,32 @@ def softmax(x):
     return np.array(results)
 
 
-def train(data, labels, w):
-    # w = np.zeros([data.shape[1], labels.shape[1]])
+def train(data, labels, w=None, valid_data=None, valid_labels=None):
+    if w is None:
+        w = np.zeros([data.shape[1], labels.shape[1]])
     converged = False
     iteration_max = 100000
-    learning_rate = 1e-2
+    learning_rate = 1e-1
     i = 0
+    all_loss = []
+    all_train_accuracy = []
+    all_valid_accuracy = []
     while not converged and (i < iteration_max):
         loss, grad = get_loss(w, data, labels)
         w = w - (learning_rate  * grad)
 
-        if i % 1000 == 0:
+        if i % 200 == 0:
+            train_prediction = predict(data, w)
+            train_accuracy = calculate_accuracy(train_prediction, np.argmax(labels, axis=1))
+            all_train_accuracy += [train_accuracy]
+            print("Train accuracy is: " + str(train_accuracy))
+            if not valid_labels is None:
+                # valid_prediction = predict(valid_labels, w)
+                valid_accuracy = calculate_accuracy(predict(valid_data, w), np.argmax(valid_labels, axis=1))
+                all_valid_accuracy += [valid_accuracy]
+                print("Valid accuracy is: " + str(valid_accuracy))
+
+            all_loss += [loss]
             print("Loss on iteration " + str(i) + " is: " + str(loss))
 
         if np.sum(grad * grad) < 1e-5:
@@ -38,13 +53,21 @@ def train(data, labels, w):
 
         i += 1
 
-    return w
+    return w, all_loss, all_train_accuracy, all_valid_accuracy
 
 
 def predict(x, w):
     probabilities = softmax(np.dot(x, w))
-    print(probabilities)
     prediction = np.argmax(probabilities, axis=1)
     return prediction
+
+
+def calculate_accuracy(prediction, actual):
+    correct = 0
+    for i in range(len(prediction)):
+        if prediction[i] == actual[i]:
+            correct += 1
+    return correct / len(prediction)
+
 
 
